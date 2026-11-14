@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.3</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>io.netpulse</groupId>
+    <artifactId>netpulse-backend</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <name>NetPulse Cloud Backend</name>
+    <description>Cloud-Native Network Device Inventory, Telemetry &amp; Automation Backend</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <openapi-generator.version>7.11.0</openapi-generator.version>
+        <swagger-annotations.version>2.2.28</swagger-annotations.version>
+    </properties>
+
+    <dependencies>
+        <!-- Web, Validation & Observability Readiness -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Persistence & Flyway Versioned Migrations -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- OpenAPI Generator Compile-Time Annotations -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
+            <version>${swagger-annotations.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
+
+        <!-- Testing (JUnit 5, Mockito, Slice Tests; Testcontainers unlocked in Week 2) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Contract-First OpenAPI 3 -> Spring Boot 3 Jakarta Interfaces + DTOs -->
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator.version}</version>
+                <configuration>
+                    <inputSpec>${project.basedir}/../contracts/netpulse-openapi.yaml</inputSpec>
+                    <generatorName>spring</generatorName>
+                    <output>${project.basedir}/src/generated/java</output>
+                    <apiPackage>io.netpulse.cloud.api.generated</apiPackage>
+                    <modelPackage>io.netpulse.cloud.api.generated.model</modelPackage>
+                    <generateSupportingFiles>false</generateSupportingFiles>
+                    <configOptions>
+                        <sourceFolder>.</sourceFolder>
+                        <useSpringBoot3>true</useSpringBoot3>
+                        <interfaceOnly>true</interfaceOnly>
+                        <skipDefaultInterface>true</skipDefaultInterface>
+                        <useTags>true</useTags>
+                        <openApiNullable>false</openApiNullable>
+                        <dateLibrary>java8</dateLibrary>
+                        <documentationProvider>none</documentationProvider>
+                    </configOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-netpulse-spring-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Ensures IntelliJ IDEA & VS Code auto-mark generated OpenAPI classes as a Source Root -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>add-openapi-generated-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/src/generated/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

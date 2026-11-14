@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: NetPulse Cloud — Network Device Inventory & Telemetry API
+  version: 1.0.0
+  description: >
+    Contract-first REST API for NetPulse Cloud, a cloud-native network device inventory,
+    real-time telemetry, and automated remediation platform.
+  contact:
+    name: Masoud Dehghan
+    url: https://github.com/MasoudDehghan
+
+servers:
+  - url: http://localhost:8080
+    description: Local Development Server
+
+tags:
+  - name: Devices
+    description: Multi-vendor router & satellite terminal inventory operations
+
+paths:
+  /api/v1/devices:
+    post:
+      tags: [ Devices ]
+      operationId: registerDevice
+      summary: Onboard a new router, switch, or satellite terminal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDeviceRequest'
+      responses:
+        '201':
+          description: Device successfully onboarded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          description: Validation error (RFC 7807 ProblemDetail)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetailResponse'
+        '409':
+          description: Duplicate hostname or management IP address
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetailResponse'
+
+    get:
+      tags: [ Devices ]
+      operationId: listDevices
+      summary: Query paginated device fleet with optional filters
+      parameters:
+        - name: vendor
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/DeviceVendorDto'
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/DeviceStatusDto'
+        - name: region
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 64
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Paginated list of network devices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicePageResponse'
+
+  /api/v1/devices/fleet-summary:
+    get:
+      tags: [ Devices ]
+      operationId: getFleetSummary
+      summary: Aggregate device health KPIs across the fleet
+      responses:
+        '200':
+          description: Fleet health summary counters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FleetSummaryResponse'
+
+  /api/v1/devices/{deviceId}:
+    get:
+      tags: [ Devices ]
+      operationId: getDeviceById
+      summary: Fetch a single network device by UUID
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Device details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '404':
+          description: Device not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetailResponse'
+
+  /api/v1/devices/{deviceId}/status:
+    patch:
+      tags: [ Devices ]
+      operationId: updateDeviceStatus
+      summary: Update Status of a Device by UUID
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeviceStatusRequest'
+      responses:
+        '200':
+          description: Updated Device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '404':
+          description: Device not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetailResponse'
+
+components:
+  schemas:
+    DeviceVendorDto:
+      type: string
+      enum:
+        - CISCO_IOS_XE
+        - CISCO_NX_OS
+        - JUNIPER_JUNOS
+        - IDIRECT_SAT
+        - HNS_SAT
+
+    DeviceStatusDto:
+      type: string
+      enum:
+        - PROVISIONING
+        - HEALTHY
+        - DEGRADED
+        - UNREACHABLE
+        - MAINTENANCE
+
+    RegisterDeviceRequest:
+      type: object
+      required:
+        - hostname
+        - managementIp
+        - vendor
+        - region
+        - firmwareVersion
+      properties:
+        hostname:
+          type: string
+          minLength: 3
+          maxLength: 128
+          pattern: '^[a-zA-Z0-9.-]+$'
+          example: core-rtr-ams-01.nl.netpulse.internal
+        managementIp:
+          type: string
+          minLength: 7
+          maxLength: 45
+          pattern: '^[0-9a-fA-F.:]+$'
+          example: 10.44.12.10
+        vendor:
+          $ref: '#/components/schemas/DeviceVendorDto'
+        region:
+          type: string
+          minLength: 2
+          maxLength: 64
+          example: NL-North-Holland
+        firmwareVersion:
+          type: string
+          minLength: 1
+          maxLength: 64
+          example: 17.12.03
+    
+    UpdateDeviceStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/DeviceStatusDto'
+
+    DeviceResponse:
+      type: object
+      required:
+        - id
+        - hostname
+        - managementIp
+        - vendor
+        - region
+        - firmwareVersion
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        hostname:
+          type: string
+        managementIp:
+          type: string
+        vendor:
+          $ref: '#/components/schemas/DeviceVendorDto'
+        region:
+          type: string
+        firmwareVersion:
+          type: string
+        status:
+          $ref: '#/components/schemas/DeviceStatusDto'
+        lastSeenAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DevicePageResponse:
+      type: object
+      required:
+        - items
+        - page
+        - size
+        - totalElements
+        - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    FleetSummaryResponse:
+      type: object
+      required:
+        - totalDevices
+        - healthyCount
+        - degradedCount
+        - unreachableCount
+        - maintenanceCount
+      properties:
+        totalDevices:
+          type: integer
+          format: int64
+        healthyCount:
+          type: integer
+          format: int64
+        degradedCount:
+          type: integer
+          format: int64
+        unreachableCount:
+          type: integer
+          format: int64
+        maintenanceCount:
+          type: integer
+          format: int64
+
+    ProblemDetailResponse:
+      type: object
+      description: RFC 7807 Problem Details for HTTP APIs
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        errorCode:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

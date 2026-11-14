@@ -1,0 +1,22 @@
+:root {
+  --np-bg: #0b1120;
+  --np-surface: #111827;
+  --np-border: #1f2937;
+  --np-text: #f3f4f6;
+  --np-muted: #9ca3af;
+  --np-healthy: #10b981;
+  --np-degraded: #f59e0b;
+  --np-unreachable: #ef4444;
+  --np-accent: #38bdf8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--np-bg);
+  color: var(--np-text);
+}
