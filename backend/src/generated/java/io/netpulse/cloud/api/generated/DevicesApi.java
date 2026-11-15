@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-11-14T16:05:07.168542400+03:30[Asia/Tehran]", comments = "Generator version: 7.11.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-11-15T14:48:07.460863600+03:30[Asia/Tehran]", comments = "Generator version: 7.11.0")
 @Validated
 public interface DevicesApi {
 

@@ -60,4 +60,6 @@ public class DeviceApiMapper {
                 summary.maintenanceCount()
         );
     }
+
+
 }

@@ -1,17 +1,14 @@
 package io.netpulse.cloud.application.service;
 
-import io.netpulse.cloud.api.generated.model.DeviceStatusDto;
-import io.netpulse.cloud.api.generated.model.UpdateDeviceStatusRequest;
 import io.netpulse.cloud.domain.exception.DeviceAlreadyExistsException;
 import io.netpulse.cloud.domain.exception.DeviceNotFoundException;
 import io.netpulse.cloud.domain.model.*;
 import io.netpulse.cloud.domain.port.DeviceRepositoryPort;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Service
@@ -69,12 +66,12 @@ public class DeviceInventoryService {
     }
 
     @Transactional
-    public Device updateDeviceStatueById(UUID deviceId, UpdateDeviceStatusRequest statusRequest) throws DeviceNotFoundException{
-        Device device = deviceRepository.findById(deviceId).orElseThrow(() -> new DeviceNotFoundException(deviceId));
+    public Device updateDeviceStatueById(UUID deviceId, DeviceStatus domainStatus) {
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException(deviceId));
 
-        DeviceStatusDto statusDto = statusRequest.getStatus();
-        device = Device.builder()
-                .id(deviceId)
+        Device updated = Device.builder()
+                .id(device.id())
                 .hostname(device.hostname())
                 .managementIp(device.managementIp())
                 .region(device.region())
@@ -83,15 +80,10 @@ public class DeviceInventoryService {
                 .createdAt(device.createdAt())
                 .lastSeenAt(device.lastSeenAt())
                 .version(device.version())
-                .status(toModel(statusDto))
-                .updatedAt(OffsetDateTime.now())
+                .status(domainStatus)
+                .updatedAt(OffsetDateTime.now(ZoneOffset.UTC))
                 .build();
-        deviceRepository.save(device);
-        return device;
-    }
-    public static DeviceStatus toModel(DeviceStatusDto statusDto) {
-        if (statusDto == null) return null;
-        return DeviceStatus.valueOf(statusDto.name());
-    }
 
+        return deviceRepository.save(updated);
+    }
 }

@@ -69,7 +69,7 @@ public class DeviceController implements DevicesApi {
 
     @Override
     public ResponseEntity<DeviceResponse> updateDeviceStatus(UUID deviceId, UpdateDeviceStatusRequest updateDeviceStatusRequest) {
-        Device device = inventoryService.updateDeviceStatueById(deviceId, updateDeviceStatusRequest);
+        Device device = inventoryService.updateDeviceStatueById(deviceId, mapper.toDomainStatus(updateDeviceStatusRequest.getStatus()));
         return ResponseEntity.ok(mapper.toResponse(device));
     }
 }

@@ -133,7 +133,7 @@ class DeviceControllerWebMvcTest {
 
         when(inventoryService.updateDeviceStatueById(
                 eq(id),
-                argThat(req -> req.getStatus() == DeviceStatusDto.MAINTENANCE)))
+                argThat(req -> req.ordinal() == DeviceStatusDto.MAINTENANCE.ordinal())))
                 .thenReturn(updated);
 
         mockMvc.perform(patch("/api/v1/devices/{id}/status", id)

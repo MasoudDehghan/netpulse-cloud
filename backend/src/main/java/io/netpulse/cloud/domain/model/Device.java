@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+
 public record Device(
         UUID id,
         String hostname,

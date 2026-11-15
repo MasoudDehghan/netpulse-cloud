@@ -20,7 +20,7 @@ import jakarta.annotation.Generated;
  * RFC 7807 Problem Details for HTTP APIs
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-11-14T16:05:07.168542400+03:30[Asia/Tehran]", comments = "Generator version: 7.11.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-11-15T14:48:07.460863600+03:30[Asia/Tehran]", comments = "Generator version: 7.11.0")
 public class ProblemDetailResponse {
 
   private @Nullable URI type;
