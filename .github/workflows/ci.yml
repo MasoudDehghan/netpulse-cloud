@@ -23,7 +23,8 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
-
+      - name: Make MVN Executable
+        run: chmod +x ./mvnw
       - name: Generate OpenAPI sources & run tests
         run: ./mvnw -B clean verify
 
