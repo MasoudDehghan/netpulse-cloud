@@ -19,7 +19,7 @@ import jakarta.annotation.Generated;
  * RegisterDeviceRequest
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-11-15T14:48:07.460863600+03:30[Asia/Tehran]", comments = "Generator version: 7.11.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-11-17T11:44:21.816905300+03:30[Asia/Tehran]", comments = "Generator version: 7.11.0")
 public class RegisterDeviceRequest {
 
   private String hostname;
