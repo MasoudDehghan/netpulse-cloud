@@ -23,7 +23,7 @@ flowchart LR
     Kafka --> Rem["Remediation Worker\n(Idempotent Consumer + DLT)"]
     Core <--> PG[("PostgreSQL 16\n(Flyway DDL)")]
     Core <--> Redis[("Redis 7")]
-    Core -->|Live Alerts (SSE) & OpenAPI REST| UI["Operator Console\n(Angular 20 · Signals · OnPush)"]
+    Core -->|Live Alerts SSE & OpenAPI REST| UI["Operator Console\n(Angular 20 · Signals · OnPush)"]
     UI <-->|OAuth2 / OIDC PKCE| KC["Keycloak IAM"]
 ```
 
