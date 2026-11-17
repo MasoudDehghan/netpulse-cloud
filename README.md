@@ -13,6 +13,8 @@ Cloud-native **Network Device Inventory, Real-Time Telemetry & Automated Remedia
 
 ## System Architecture Overview
 
+The diagram below is the **planned target architecture**, not a claim that every service is implemented today. See the roadmap below for current progress.
+
 ```mermaid
 flowchart LR
     Sim["Device Simulator\n(1,000 Virtual-Thread Routers)"] -->|High-Rate Telemetry| Ing["Telemetry Ingestor\n(Java 21 · Spring Boot 3.4)"]
@@ -72,18 +74,28 @@ npm install
 npm start
 ```
 
-### 4. Run Automated Test Suite
+### 4. Run Automated Tests
 ```bash
 cd backend
-./mvnw clean verify
+./mvnw clean test    # unit, WebMvc, ArchUnit; Docker not required
+./mvnw clean verify  # includes PostgreSQL and Redis Testcontainers integration tests
 ```
+
+The full `verify` needs a running Docker daemon and access to `postgres:16-alpine` and `redis:7.4-alpine`; it fails if Docker is unavailable. The Redis test is a container smoke test, not an application integration. See [Week 2 workbook](docs/WEEK_2_WORKBOOK.md) for exercises and test details.
+
+### 5. Run the Week 3 local simulator
+```bash
+cd backend
+./mvnw -q compile exec:java -Dexec.mainClass=io.netpulse.cloud.simulator.RouterSimulator
+```
+The default run uses 1,000 finite virtual-thread router tasks and emits in-memory samples only; it does not connect to devices or the backend. For configuration and the separate HTTP concurrency experiment, see the [Week 3 workbook](docs/WEEK_3_WORKBOOK.md) and [ADR 001](docs/adr/001-virtual-threads-vs-webflux.md).
 
 ---
 
 ## Incremental Architecture Roadmap
 
 - [x] **Milestone 1:** Contract-First OpenAPI 3, Hexagonal Domain Isolation, Flyway SQL Migrations (`V1`/`V2`), RFC 7807 `ProblemDetail`, Angular 20 Signal Store & GitHub Actions CI
-- [ ] **Milestone 2:** `Testcontainers` (PostgreSQL & Redis) Integration Suite + `ArchUnit` Layer Guardrails
-- [ ] **Milestone 3:** 1,000-Router Java 21 Virtual Thread Telemetry Simulator + Keycloak OAuth2/OIDC (PKCE)
+- [ ] **Milestone 2 (in progress):** PostgreSQL Testcontainers persistence tests, Redis container smoke test and ArchUnit guardrails; full Docker-backed verification and exercises still required
+- [ ] **Milestone 3 (in progress):** Finite in-memory virtual-thread router simulator and local HTTP concurrency experiment; telemetry transport and Keycloak OAuth2/OIDC remain planned
 - [ ] **Milestone 4:** Apache Kafka Telemetry Pipeline + Transactional Outbox + Idempotent Consumers
 - [ ] **Milestone 5:** Playwright E2E Browser Suite + OpenTelemetry / Prometheus / Grafana + Kubernetes Helm Chart
